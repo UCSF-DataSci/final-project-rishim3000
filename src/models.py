@@ -25,7 +25,7 @@ def train_logistic(X_train_scaled, y_train):
 
 #XGBoost model
 def train_xgboost(X_train_scaled, y_train):
-    model = XGBClassifier(use_label_encoder = False, eval_metric = 'logloss')
+    model = XGBClassifier(eval_metric = 'logloss', random_state=42, n_estimators=100)
     model.fit(X_train_scaled, y_train)
     return model
 

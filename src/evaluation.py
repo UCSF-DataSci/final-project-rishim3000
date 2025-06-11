@@ -73,5 +73,51 @@ plt.savefig('Noise_robustness.png')
 plt.show()
 
 #Outliers
+def introduce_outliers(X, outlier_fraction = 0.05, outlier_strength = 10):
+    X_outlier = X.copy()
+    n_outliers = int(outlier_fraction * X.shape[0])
+    outlier_indices = np.random.choice(X.shape[0], n_outliers, replace = False)
 
+    X_outlier[outlier_indices] += np.random.normal(0, outlier_strength, (n_outliers, X.shape[1]))
 
+    return X_outlier
+
+#Outliers stress test loop
+
+outlier_levels = [0, 0.2, 0.4, 0.6, 0.8]
+
+outlier_results = []
+
+for outliers in outlier_levels:
+    print(f"\n--- Outlier Fraction: {outliers} ---")
+
+    X_test_outlier = introduce_outliers(X_test_scaled, outlier_fraction = outliers)
+
+    #MLP
+    y_pred_mlp_proba = mlp_model.predict(X_test_outlier)
+    y_pred_mlp = (y_pred_mlp_proba > 0.5).astype(int).flatten()
+    acc_mlp = accuracy_score(y_test, y_pred_mlp)
+    outlier_results.append(({'outlier_fraction': outliers, 'model_name': 'MLP', 'accuracy': acc_mlp}))
+
+    #Logistic Regression
+    y_pred_log = log_model.predict(X_test_outlier)
+    acc_log = accuracy_score(y_test, y_pred_log)
+    outlier_results.append(({'outlier_fraction': outliers, 'model_name': 'Logistic Regression', 'accuracy': acc_log}))
+
+    #XGBoost
+    y_pred_xgb = xgb_model.predict(X_test_outlier)
+    acc_xgb = accuracy_score(y_test, y_pred_xgb)
+    outlier_results.append(({'outlier_fraction': outliers, 'model_name': 'XGBoost', 'accuracy': acc_xgb}))
+
+df_outliers = pd.DataFrame(outlier_results)
+
+print(df_outliers)
+
+plt.figure()
+
+sns.lineplot(data = df_outliers,  x = 'outlier_fraction', y = 'accuracy', hue = 'model_name', marker = 'o')
+plt.title('Model Robustness to Outliers')
+plt.ylim(0.5, 1.0)
+plt.grid(True)
+plt.savefig('Outliers_robustness.png')
+plt.show()

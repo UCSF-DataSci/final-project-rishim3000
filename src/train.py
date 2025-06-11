@@ -57,9 +57,11 @@ print('MLP Accuracy:', accuracy_score(y_test, mlp_preds))
 print('Logistic Regression Accuracy:', accuracy_score(y_test, log_preds))
 print('XGBoost Accuracy:', accuracy_score(y_test, xgb_preds))
 
+print(y_train)
 
 
-#All 3 models have similarly good accuracy > 0.97
+
+#All 3 models have similarly good accuracy ~ 0.97
 
 #save models
 mlp_model.save('models/mlp_model.keras')
